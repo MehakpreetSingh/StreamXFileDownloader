@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Download API Tester</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <h1 class="fs-4">File Download API</h1>
+        </header>
+
+        <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+            <div class="container-fluid py-5">
+                <h2 class="display-5 fw-bold">sCloud File Extractor</h2>
+                <p class="col-md-8 fs-4">Enter a file ID from scloud.ninja to fetch download information.</p>
+                
+                <div class="mb-3">
+                    <label for="fileId" class="form-label">File ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text">https://new4.scloud.ninja/file/</span>
+                        <input type="text" class="form-control" id="fileId" placeholder="Enter file ID">
+                        <button class="btn btn-primary" id="fetchBtn">Fetch</button>
+                    </div>
+                    <div class="form-text">Enter only the ID part of the URL, not the full URL.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-md-stretch">
+            <div class="col-md-12">
+                <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+                    <h2>Results</h2>
+                    <div id="results">
+                        <p class="text-muted">No results yet. Use the form above to fetch file information.</p>
+                    </div>
+                    
+                    <div id="errorContainer" class="alert alert-danger d-none" role="alert">
+                        Error message will appear here
+                    </div>
+                    
+                    <div id="loadingContainer" class="d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Fetching data...</span>
+                    </div>
+                    
+                    <div id="resultContainer" class="d-none">
+                        <div class="mb-3">
+                            <h5>Filename:</h5>
+                            <p id="filename" class="ps-3"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5>Size:</h5>
+                            <p id="filesize" class="ps-3"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5>Download Link:</h5>
+                            <p class="ps-3">
+                                <a id="downloadLink" href="#" target="_blank" class="btn btn-success">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="pt-3 mt-4 text-body-secondary border-top">
+            &copy; 2023 File Download API
+        </footer>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
