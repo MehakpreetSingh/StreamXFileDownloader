@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12121a" stop-opacity="1" />
+      <stop offset="100%" stop-color="#0f0f12" stop-opacity="1" />
+    </linearGradient>
+    <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.15 0" />
+      <feBlend mode="overlay" in2="SourceGraphic" result="noise" />
+    </filter>
+    <pattern id="pattern-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="none" />
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(53, 239, 255, 0.03)" stroke-width="0.5" />
+    </pattern>
+    <pattern id="pattern-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="none" />
+      <circle cx="10" cy="10" r="0.5" fill="rgba(53, 239, 255, 0.1)" />
+    </pattern>
+    <linearGradient id="grid-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(53, 239, 255, 0.05)" stop-opacity="1" />
+      <stop offset="50%" stop-color="rgba(53, 239, 255, 0.02)" stop-opacity="1" />
+      <stop offset="100%" stop-color="rgba(140, 92, 255, 0.05)" stop-opacity="1" />
+    </linearGradient>
+    <mask id="mask1">
+      <rect width="1440" height="900" fill="white" />
+      <rect x="-100" y="-100" width="1640" height="1100" fill="url(#pattern-grid)" />
+    </mask>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Base background -->
+  <rect width="1440" height="900" fill="url(#gradient1)" />
+  
+  <!-- Noise overlay -->
+  <rect width="1440" height="900" fill="url(#pattern-dots)" opacity="0.5" />
+  
+  <!-- Subtle grid lines -->
+  <rect width="1440" height="900" fill="url(#grid-gradient)" mask="url(#mask1)" />
+  
+  <!-- Noise filter -->
+  <rect width="1440" height="900" filter="url(#noise)" fill-opacity="0.1" />
+  
+  <!-- Glowing accents -->
+  <circle cx="1100" cy="200" r="2" fill="#35efff" filter="url(#glow)" opacity="0.7" />
+  <circle cx="500" cy="700" r="2" fill="#8c5cff" filter="url(#glow)" opacity="0.6" />
+  <circle cx="800" cy="100" r="1.5" fill="#ff2cf0" filter="url(#glow)" opacity="0.5" />
+  <circle cx="250" cy="500" r="1.5" fill="#35efff" filter="url(#glow)" opacity="0.7" />
+  <circle cx="900" cy="600" r="1" fill="#8c5cff" filter="url(#glow)" opacity="0.6" />
+  <circle cx="300" cy="200" r="1" fill="#ff2cf0" filter="url(#glow)" opacity="0.5" />
+  
+  <!-- Cyberpunk grid lines -->
+  <g opacity="0.1">
+    <line x1="0" y1="300" x2="1440" y2="300" stroke="#35efff" stroke-width="1" />
+    <line x1="0" y1="600" x2="1440" y2="600" stroke="#35efff" stroke-width="1" />
+    <line x1="480" y1="0" x2="480" y2="900" stroke="#35efff" stroke-width="1" />
+    <line x1="960" y1="0" x2="960" y2="900" stroke="#35efff" stroke-width="1" />
+  </g>
+  
+  <!-- Digital circuit patterns -->
+  <path d="M 0,0 L 100,100 L 200,50 L 300,150 L 400,100 L 500,200" stroke="#35efff" stroke-width="0.5" fill="none" stroke-opacity="0.1" />
+  <path d="M 1440,900 L 1340,800 L 1240,850 L 1140,750 L 1040,800 L 940,700" stroke="#8c5cff" stroke-width="0.5" fill="none" stroke-opacity="0.1" />
+  <path d="M 0,900 L 100,800 L 200,850 L 300,750 L 400,800 L 500,700" stroke="#ff2cf0" stroke-width="0.5" fill="none" stroke-opacity="0.1" />
+  <path d="M 1440,0 L 1340,100 L 1240,50 L 1140,150 L 1040,100 L 940,200" stroke="#35efff" stroke-width="0.5" fill="none" stroke-opacity="0.1" />
+</svg>

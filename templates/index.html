@@ -1,83 +1,569 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Download API Tester</title>
+    <title>StreamX | Advanced File Download</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="container py-4">
-        <header class="pb-3 mb-4 border-bottom">
-            <h1 class="fs-4">File Download API</h1>
-        </header>
+    <!-- Mobile bottom navigation is sufficient, removed hamburger menu -->
 
-        <div class="p-5 mb-4 bg-body-tertiary rounded-3">
-            <div class="container-fluid py-5">
-                <h2 class="display-5 fw-bold">sCloud File Extractor</h2>
-                <p class="col-md-8 fs-4">Enter a file ID from scloud.ninja to fetch download information.</p>
+    <div class="layout-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Brand -->
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="bi bi-play-circle-fill" style="color: var(--neon-blue);"></i>
+                </div>
+                <div class="brand-text">StreamX</div>
+            </div>
+            
+            <!-- Navigation Sections -->
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <a href="/" class="nav-link active">
+                    <i class="bi bi-house-door"></i>
+                    Dashboard
+                </a>
+                <a href="javascript:scrollToSection('search-section')" class="nav-link" data-mobile-close="true">
+                    <i class="bi bi-search"></i>
+                    Search Files
+                </a>
+                <a href="javascript:scrollToSection('results-section')" class="nav-link" data-mobile-close="true">
+                    <i class="bi bi-cloud-download"></i>
+                    Downloads
+                </a>
+            </div>
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">RESOURCES</div>
+                <a href="/info" class="nav-link">
+                    <i class="bi bi-code-slash"></i>
+                    API Documentation
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-info-circle"></i>
+                    Help Center
+                </a>
+            </div>
+            
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="user-avatar">G</div>
+                <div class="user-info">
+                    <div class="user-name">Guest User</div>
+                    <div class="user-status">Online</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Mobile Top Navigation Bar -->
+            <div class="mobile-top-nav">
+                <div class="d-flex justify-content-between align-items-center p-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-play-circle-fill me-2" style="color: var(--neon-blue); font-size: 1.25rem;"></i>
+                        <span class="fw-bold cyberpunk-gradient-text">StreamX</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm" id="mobileSearchBtn" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cyberpunk Hero Banner -->
+            <div class="hero-bg mb-4" id="search-section">
+                <img src="https://images.unsplash.com/photo-1604076913837-52ab5629fba9?q=80&w=2940&auto=format&fit=crop" alt="Cyberpunk cityscape" class="hero-banner">
+                <div class="hero-image-overlay"></div>
+                <div class="hero-tag">PREMIUM ACCESS</div>
                 
-                <div class="mb-3">
-                    <label for="fileId" class="form-label">File ID</label>
-                    <div class="input-group">
-                        <span class="input-group-text">https://new4.scloud.ninja/file/</span>
-                        <input type="text" class="form-control" id="fileId" placeholder="Enter file ID">
-                        <button class="btn btn-primary" id="fetchBtn">Fetch</button>
-                    </div>
-                    <div class="form-text">Enter only the ID part of the URL, not the full URL.</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row align-items-md-stretch">
-            <div class="col-md-12">
-                <div class="h-100 p-5 bg-body-tertiary border rounded-3">
-                    <h2>Results</h2>
-                    <div id="results">
-                        <p class="text-muted">No results yet. Use the form above to fetch file information.</p>
-                    </div>
+                <div class="hero-content">
+                    <h1 class="hero-title" style="color: var(--neon-blue);">
+                        <span>StreamX</span>
+                    </h1>
+                    <p class="hero-subtitle">High-speed downloads from the digital void. Find and stream any file instantly.</p>
                     
-                    <div id="errorContainer" class="alert alert-danger d-none" role="alert">
-                        Error message will appear here
-                    </div>
-                    
-                    <div id="loadingContainer" class="d-none">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                    <div class="search-container">
+                        <div class="search-input-group mb-3">
+                            <input type="text" id="searchQuery" class="search-input" placeholder="Search for files, documents, images...">
+                            <i class="bi bi-search search-icon"></i>
                         </div>
-                        <span class="ms-2">Fetching data...</span>
-                    </div>
-                    
-                    <div id="resultContainer" class="d-none">
-                        <div class="mb-3">
-                            <h5>Filename:</h5>
-                            <p id="filename" class="ps-3"></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button id="searchBtn" class="search-btn py-2">
+                                <i class="bi bi-search me-2"></i> <span class="d-none d-md-inline">Search</span><span class="d-inline d-md-none">Find</span>
+                            </button>
+                            <button id="searchTipsBtn" class="btn" style="background-color: rgba(25, 25, 35, 0.6); border: 1px solid rgba(53, 239, 255, 0.1); color: var(--text-secondary);">
+                                <i class="bi bi-info-circle me-1"></i> Search Tips
+                            </button>
                         </div>
                         
-                        <div class="mb-3">
-                            <h5>Size:</h5>
-                            <p id="filesize" class="ps-3"></p>
+                        <div class="search-options">
+                            <div class="search-filter d-none d-md-flex">
+                                <div class="filter-item active">All</div>
+                                <div class="filter-item">Movies</div>
+                                <div class="filter-item">TV</div>
+                                <div class="filter-item">Music</div>
+                            </div>
+                            <div class="trending-searches">
+                                <i class="bi bi-fire" style="color: var(--neon-blue); font-size: 0.9rem;"></i>
+                                <span>Trending: Dune, Oppenheimer, Last of Us</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="hero-stat-icon">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <div class="hero-stat-value">Unlimited</div>
+                            <div class="hero-stat-label">Speed</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="hero-stat-value">Secure</div>
+                            <div class="hero-stat-label">Downloads</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-icon">
+                                <i class="bi bi-hdd-network"></i>
+                            </div>
+                            <div class="hero-stat-value">Global</div>
+                            <div class="hero-stat-label">CDN</div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-social">
+                        <a href="#" class="hero-social-link">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="hero-social-link">
+                            <i class="bi bi-telegram"></i>
+                        </a>
+                        <a href="#" class="hero-social-link">
+                            <i class="bi bi-discord"></i>
+                        </a>
+                        <a href="#" class="hero-social-link">
+                            <i class="bi bi-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="container">
+                <div class="row mb-5">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card mb-3">
+                            <div class="stat-value" style="color: var(--neon-blue);">Unlimited</div>
+                            <div class="stat-label">Download Speed</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card mb-3">
+                            <div class="stat-value" style="color: var(--neon-blue);">Millions</div>
+                            <div class="stat-label">Available Files</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card mb-3">
+                            <div class="stat-value" style="color: var(--neon-blue);">24/7</div>
+                            <div class="stat-label">Availability</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card mb-3">
+                            <div class="stat-value" style="color: var(--neon-blue);">100%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Trending Section -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0 fs-5 fw-bold">
+                            <i class="bi bi-fire me-2" style="color: var(--text-primary);"></i> 
+                            Popular Movies & TV Shows
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Breaking Bad
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                The Batman 2022
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Stranger Things S04
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Dune 
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Game of Thrones S08E06
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                The Last of Us S01
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Oppenheimer 2023
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: var(--button-bg); border: var(--button-border);">
+                                Avatar 2 4K
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Results Section -->
+                <div class="card mb-4" id="results-section">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <i class="bi bi-file-earmark-text"></i>
+                            Search Results
+                        </div>
+                        <div class="card-header-actions">
+                            <div id="searchLoading" class="d-none loading-container">
+                                <div class="loading-indicator"></div>
+                                <span class="loading-text">Searching the cloud...</span>
+                            </div>
+                            <div id="searchResultCount" class="">
+                            </div>
+                            <a href="#" class="card-action-btn" id="filterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-filter"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterBtn" style="background-color: rgba(15, 20, 30, 0.95); border: 1px solid rgba(53, 239, 255, 0.2);">
+                                <li><h6 class="dropdown-header">Filter By Type</h6></li>
+                                <li><a class="dropdown-item filter-option" data-filter="all" href="#">All Files</a></li>
+                                <li><a class="dropdown-item filter-option" data-filter="video" href="#">Video Files</a></li>
+                                <li><a class="dropdown-item filter-option" data-filter="audio" href="#">Audio Files</a></li>
+                                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                <li><h6 class="dropdown-header">Filter By Size</h6></li>
+                                <li><a class="dropdown-item filter-option" data-filter="large" href="#">Large (>5GB)</a></li>
+                                <li><a class="dropdown-item filter-option" data-filter="medium" href="#">Medium (1GB-5GB)</a></li>
+                                <li><a class="dropdown-item filter-option" data-filter="small" href="#">Small (<1GB)</a></li>
+                            </ul>
+                            <div id="sortState" class="">
+                            </div>
+                            <a href="#" class="card-action-btn" id="sortBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-arrow-down-up"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortBtn" style="background-color: rgba(15, 20, 30, 0.95); border: 1px solid rgba(53, 239, 255, 0.2);">
+                                <li><h6 class="dropdown-header">Sort Options</h6></li>
+                                <li><a class="dropdown-item sort-option" data-sort="name-asc" href="#">Name (A-Z)</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="name-desc" href="#">Name (Z-A)</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="size-asc" href="#">Size (Smallest First)</a></li>
+                                <li><a class="dropdown-item sort-option" data-sort="size-desc" href="#">Size (Largest First)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div id="searchError" class="alert d-none" role="alert" 
+                             style="background-color: rgba(255, 44, 85, 0.1); border: 1px solid rgba(255, 44, 85, 0.3); color: #ff2c55; border-radius: 8px; padding: 1rem;">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span class="error-message">Error message will appear here</span>
                         </div>
                         
-                        <div class="mb-3">
-                            <h5>Download Link:</h5>
-                            <p class="ps-3">
-                                <a id="downloadLink" href="#" target="_blank" class="btn btn-success">
-                                    <i class="bi bi-download"></i> Download
-                                </a>
-                            </p>
+                        <div id="searchResults">
+                            <div class="text-center py-5">
+                                <div style="width: 80px; height: 80px; margin: 0 auto; border-radius: 50%; background: rgba(53, 239, 255, 0.05); display: flex; justify-content: center; align-items: center; border: 1px solid rgba(53, 239, 255, 0.1);">
+                                    <i class="bi bi-search" style="font-size: 2rem; color: var(--neon-blue);"></i>
+                                </div>
+                                <p class="mt-4 text-muted">Enter your search query to find files in the digital cloud</p>
+                                <p class="small text-muted">Try searching for movies, TV shows, music, or software</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fs-5 fw-bold">
+                            <i class="bi bi-star-fill me-2" style="color: var(--text-primary);"></i>
+                            User Reviews
+                        </h3>
+                        <div>
+                            <button class="btn btn-sm" style="background-color: var(--button-bg); border: var(--button-border);">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button class="btn btn-sm" style="background-color: var(--button-bg); border: var(--button-border);">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                    </div>
+                                    <p class="text-muted mb-1">Amazing download speeds</p>
+                                    <p class="small text-muted mb-0">Downloaded a 4K movie in minutes! Can't believe how fast this is.</p>
+                                    <div class="d-flex align-items-center mt-3">
+                                        <div class="rounded-circle" style="width: 30px; height: 30px; background-color: var(--neon-blue); display: flex; align-items: center; justify-content: center;">
+                                            <span class="text-dark fw-bold">J</span>
+                                        </div>
+                                        <span class="ms-2 small">James T. - 2 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-fill" style="color: var(--text-primary);"></i>
+                                        <i class="bi bi-star-half" style="color: var(--text-primary);"></i>
+                                    </div>
+                                    <p class="text-muted mb-1">Exactly what I needed</p>
+                                    <p class="small text-muted mb-0">Found some rare TV episodes that I couldn't find anywhere else. Great resource!</p>
+                                    <div class="d-flex align-items-center mt-3">
+                                        <div class="rounded-circle" style="width: 30px; height: 30px; background-color: var(--neon-blue); display: flex; align-items: center; justify-content: center;">
+                                            <span class="text-dark fw-bold">S</span>
+                                        </div>
+                                        <span class="ms-2 small">Sophia R. - 1 week ago</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Mobile Bottom Navigation -->
+            <div class="bottom-nav">
+                <a href="/" class="nav-item active">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>Home</span>
+                </a>
+                <a href="javascript:scrollToSection('search-section')" class="nav-item">
+                    <i class="bi bi-search"></i>
+                    <span>Search</span>
+                </a>
+                <a href="javascript:scrollToSection('results-section')" class="nav-item">
+                    <i class="bi bi-cloud-download"></i>
+                    <span>Results</span>
+                </a>
+                <a href="/info" class="nav-item">
+                    <i class="bi bi-info-circle"></i>
+                    <span>API</span>
+                </a>
+            </div>
         </div>
-
-        <footer class="pt-3 mt-4 text-body-secondary border-top">
-            &copy; 2023 File Download API
-        </footer>
     </div>
-
+    
+    <!-- File Details Modal - Redesigned to match reference image -->
+    <div class="modal fade" id="fileDetailsModal" tabindex="-1" aria-labelledby="fileDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-file-earmark me-2"></i>
+                        <h5 class="modal-title" id="fileDetailsModalLabel">File Details</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div id="fileDetailsLoader" class="text-center py-5">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Retrieving file details...</p>
+                </div>
+                
+                <!-- Error message -->
+                <div id="modalFileError" class="alert alert-danger mx-3 d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span class="error-message">Error message will appear here</span>
+                </div>
+                
+                <!-- Content loaded -->
+                <div id="fileDetailsContent" class="modal-body d-none px-4 py-4">
+                    <div class="file-details-container">
+                        <!-- Filename section -->
+                        <div class="file-detail-row">
+                            <div class="file-detail-icon">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="file-detail-content">
+                                <div class="file-detail-label">FILENAME</div>
+                                <div id="modalFilename" class="file-detail-value">Filename.mp4</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Size section -->
+                        <div class="file-detail-row">
+                            <div class="file-detail-icon">
+                                <i class="bi bi-hdd"></i>
+                            </div>
+                            <div class="file-detail-content">
+                                <div class="file-detail-label">SIZE</div>
+                                <div id="modalFilesize" class="file-detail-value">Calculating...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Download URL section -->
+                        <div class="file-detail-row">
+                            <div class="file-detail-icon">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <div class="file-detail-content">
+                                <div class="file-detail-label">DOWNLOAD URL</div>
+                                <div class="d-flex mt-2 bg-darker rounded p-2">
+                                    <input type="text" class="form-control-plaintext text-truncate text-white bg-transparent border-0 py-1 px-2 flex-grow-1" id="linkToCopy" readonly>
+                                    <button class="btn btn-sm copy-btn" type="button" id="copyLinkBtn">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status section -->
+                        <div class="file-detail-row">
+                            <div class="file-detail-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="file-detail-content">
+                                <div class="file-detail-label">STATUS</div>
+                                <div class="file-status-badge">Ready for download</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-download-container">
+                        <div class="download-icon-container">
+                            <i class="bi bi-cloud-download download-icon"></i>
+                        </div>
+                        <div class="download-file-text">Download File</div>
+                        <a href="#" id="modalDownloadLink" target="_blank" class="btn download-now-btn">
+                            <i class="bi bi-download me-2"></i>
+                            Download Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Tips Modal -->
+    <div class="modal fade" id="searchTipsModal" tabindex="-1" aria-labelledby="searchTipsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: rgba(13, 18, 28, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="modal-header border-bottom-0">
+                    <div class="d-flex align-items-center">
+                        <div class="me-2" style="background-color: rgba(53, 239, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                            <i class="bi bi-lightbulb text-white"></i>
+                        </div>
+                        <h5 class="modal-title mb-0" id="searchTipsModalLabel">Search Tips</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <div class="mb-4 search-tip-container">
+                        <h6 class="mb-3 mt-2">How to get the best search results:</h6>
+                        <div class="trending-table" style="background: rgba(20, 30, 45, 0.5); backdrop-filter: blur(10px); border-radius: 12px; overflow: hidden; border: 1px solid rgba(53, 239, 255, 0.2); box-shadow: 0 0 20px rgba(53, 239, 255, 0.05);">
+                            <!-- Row 1 -->
+                            <div class="trending-row d-flex align-items-center" style="padding: 12px 15px; border-bottom: 1px solid rgba(53, 239, 255, 0.15);">
+                                <div class="tip-icon me-3">
+                                    <i class="bi bi-display"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <div class="tip-title">Use S01E01 format for TV series</div>
+                                    <div class="tip-description text-muted small">Example: "Breaking Bad S01E01" instead of "Breaking Bad Episode 1"</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 2 -->
+                            <div class="trending-row d-flex align-items-center" style="padding: 12px 15px; border-bottom: 1px solid rgba(53, 239, 255, 0.15);">
+                                <div class="tip-icon me-3">
+                                    <i class="bi bi-sort-down"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <div class="tip-title">Sort results by size for better quality</div>
+                                    <div class="tip-description text-muted small">Larger files often have higher resolution and better audio quality</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 3 -->
+                            <div class="trending-row d-flex align-items-center" style="padding: 12px 15px;">
+                                <div class="tip-icon me-3">
+                                    <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <div class="tip-title">Try different spellings if no results</div>
+                                    <div class="tip-description text-muted small">Some files might use alternative spellings or abbreviations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-2" style="background-color: rgba(53, 239, 255, 0.2); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                                <i class="bi bi-fire text-white"></i>
+                            </div>
+                            <h6 class="mb-0">Trending Movies & TV Shows</h6>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm trending-search-item" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+                                Breaking Bad
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+                                The Batman 2022
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+                                Stranger Things S04
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+                                Dune 2023
+                            </button>
+                            <button class="btn btn-sm trending-search-item" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+                                Game of Thrones S08E06
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-sm search-btn" data-bs-dismiss="modal">
+                        Got it!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
     <script src="/static/js/script.js"></script>
 </body>
 </html>

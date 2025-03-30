@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SCLOUD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            font-display: swap;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid #3b3b3b;
+            transition: all 0.2s ease;
+        }
+        .search-container {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .result-card {
+            cursor: pointer;
+        }
+        .result-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .trending-tag {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .trending-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        .title-container {
+            min-height: 2.5rem;
+            height: auto;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        /* Loading Animation Styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+        }
+        .loading-spinner:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid #3b82f6;
+            border-color: #3b82f6 transparent #3b82f6 transparent;
+            animation: loading-spinner 1.2s linear infinite;
+        }
+        @keyframes loading-spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        /* Fancy Input Animation */
+        .fancy-input {
+            transition: all 0.3s ease;
+        }
+        .fancy-input:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Result Card Animations */
+        .result-appear {
+            animation: result-appear 0.5s forwards;
+        }
+        @keyframes result-appear {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* Floating Elements Animation */
+        .float {
+            animation: float 5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Glow effect */
+        .glow {
+            transition: all 0.3s ease;
+        }
+        .glow:hover {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Fade-in animation for page load */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+    <!-- Background Pattern -->
+    <div class="bg-pattern"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="text-center">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-blue-400 font-medium text-lg">Searching the galaxy...</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 fade-in">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-2 float">
+                <a href="/" class="gradient-text hover:opacity-80 transition-opacity">SCLOUD</a>
+            </h1>
+            <p class="text-gray-400 mb-2">Your Ultimate Media Search Engine</p>
+            <div class="flex justify-center gap-4">
+                <a href="/about" class="text-blue-400 hover:text-blue-300 transition-colors text-sm flex items-center gap-1 glow px-2 py-1 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                    About & Stats
+                </a>
+            </div>
+        </header>
+
+        <!-- Search -->
+        <div class="card search-container max-w-2xl mx-auto rounded-lg p-5 mb-8 glow">
+            <form id="searchForm" class="flex flex-col md:flex-row gap-4" onsubmit="processSearch(event)">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    name="search" 
+                    placeholder="Search for a movie or series (e.g. Citadel)"
+                    value="Avengers" 
+                    class="fancy-input flex-1 px-4 py-3 rounded-lg bg-gray-900 text-gray-200 border border-gray-700 focus:outline-none transition-all"
+                    autocomplete="off"
+                    autofocus
+                >
+                <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-all whitespace-nowrap text-white glow" id="searchButton">
+                    <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                        Search
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- No Results Message -->
+        
+
+        <!-- Trending Sections -->
+        
+
+        <!-- Results -->
+        
+        <div class="max-w-4xl mx-auto space-y-4 fade-in" style="animation-delay: 0.5s;">
+            <div class="flex items-center justify-between px-4 py-3 bg-gray-900 rounded-lg mb-4 border border-gray-700">
+                <span class="text-gray-400">134 Results</span>
+                <form method="get" action="/" class="flex items-center gap-2">
+                    <input type="hidden" name="token" value="576878fe-46f8-48bd-ba88-e5200039760e">
+                    <input type="hidden" name="sort" value="size">
+                    <input type="hidden" name="direction" value="desc">
+                    <button type="submit" class="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+                        Sort by size
+                        
+                    </button>
+                </form>
+            </div>
+
+            <div id="searchResults">
+                
+                <a href="/file/0e4f2d91-77ac-472b-90f9-f36e5f9a12fd" class="block result-appear" style="animation-delay: 0.05s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The_Avengers_2012_Hybrid_1080p_BluRay_REMUX_AVC_TrueHD_Atmos_7_1.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">29.94 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e7f6163c-a8be-4519-a2eb-c8e141771f4b" class="block result-appear" style="animation-delay: 0.1s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Age of Ultron 2015 BluRay 1080p Dual Audio [Hindi BD 5.1 + English DTS 5.1] x264 ESub - mkvCinemas [Telly].mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">11.57 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/5045d971-9f3f-4a00-a461-1981e330b4c3" class="block result-appear" style="animation-delay: 0.15000000000000002s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Age of Ultron (2015) BluRay 1080p HQ 10bit [Hindi DD5.1 640Kbps+English DD7.1]x265 HEVC (ÌMMØRTÀL) PSA ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.63 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/31aa1a43-ca5c-4948-b3f6-80c0c27fd335" class="block result-appear" style="animation-delay: 0.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.2160p.UHD.BluRay.x265.HDR.DV.DD+7.1-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">7.06 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/0787d477-6518-4d64-a07d-2583dd7f4221" class="block result-appear" style="animation-delay: 0.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War 2018 2160p UHD BluRay x265 HDR DD+7.1-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.52 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/09d8a084-5d5d-4a1d-9146-80c8c69f70fe" class="block result-appear" style="animation-delay: 0.30000000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.IMAX.2160p.WEB-DL.x265.HDR.DD+5.1.Atmos-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.23 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/66021589-262a-4732-944a-4bb63fee670e" class="block result-appear" style="animation-delay: 0.35000000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.2160p.UHD.BluRay.x265.HDR.DD+7.1-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">4.99 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/485c39e2-3989-4eb3-b43d-6e7665ca41a3" class="block result-appear" style="animation-delay: 0.4s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.V2.UHD.BluRay.REMUX.2160p.HEVC.Atmos.TrueHD7.1.2Audio-CHD English.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">61.92 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/a6664b4d-ac50-4f9c-b809-9c89deb57411" class="block result-appear" style="animation-delay: 0.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame 2019 720p 10bit BluRay x265 HEVC [Hindi DD5.1 ~192Kbps + English DD5.1] (ÌMMØRTÀL) PSA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.67 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e7e5e8f5-02d8-42c6-8769-564739f2e4d6" class="block result-appear" style="animation-delay: 0.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">30.50 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/134ad9eb-5a63-4729-9deb-7b97de08da18" class="block result-appear" style="animation-delay: 0.55s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">32.83 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/6d01dbb1-f106-4e2d-9bc5-c015cb7afa1a" class="block result-appear" style="animation-delay: 0.6000000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.REPACK.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">37.68 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/6e15cedd-8d48-46cf-bb81-daa803e5ecb7" class="block result-appear" style="animation-delay: 0.65s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">30.01 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f675dfbe-6555-4cd3-9536-63d70b265b5b" class="block result-appear" style="animation-delay: 0.7000000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.3D.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">37.45 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/8d92c92d-13dd-46e9-9abf-76e0cd7d1ee9" class="block result-appear" style="animation-delay: 0.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.3D.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">41.73 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7a1aaaf8-7c64-4694-9d50-b89a6a4beaeb" class="block result-appear" style="animation-delay: 0.8s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.3D.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">37.36 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d1ab2079-3202-47ed-a079-9f0ef9fc431e" class="block result-appear" style="animation-delay: 0.8500000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 1080p 10bit BluRay x265 HEVC [Hindi BD5.1 ~ 640Kbps + English AAC 7.1] Esub ~ Tigole.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.29 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/a6252e65-e33c-457b-bcc4-224f25f8c0dc" class="block result-appear" style="animation-delay: 0.9s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.1080p.BluRay.DTS.x264-CtrlHD.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">15.08 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/ddc000b7-bc66-4751-aa4a-c72d80ad0abb" class="block result-appear" style="animation-delay: 0.9500000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.1080p.BluRay.DTS.x264-HiFi.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">16.89 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c3563273-de08-453c-b36a-2a0fa1420214" class="block result-appear" style="animation-delay: 1.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Age Of Ultron (2015) 720p 10bit BluRay x265 HEVC [Org DSNP Hindi DDP 5.1 ~192Kbps + English DDP 5.1] ESub ~ Immortal.mkv_</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.34 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/0143fe5e-31f5-4d3d-99a8-f6c539c5c445" class="block result-appear" style="animation-delay: 1.05s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Endgame (2019) 720p 10bit BluRay x265 HEVC [Org DSNP Hindi DDP 5.1 ~192Kbps + English DDP 5.1] ESub ~ Immortal.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.31 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/4e5e70a8-3a60-49cb-ab0e-91e103e736a9" class="block result-appear" style="animation-delay: 1.1s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Ultimate.Avengers.II.2006.1080p.BluRay.DD5.1.x264-SA89.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">4.84 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/9607a48d-057b-4142-b416-3f749e51f401" class="block result-appear" style="animation-delay: 1.1500000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.BluRay.1080p.DTS-HD.MA.7.1.AVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">27.86 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3d190500-e140-4289-9f09-ee27ec785c13" class="block result-appear" style="animation-delay: 1.2000000000000002s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) Hybrid 1080p [Open Matte].mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">28.46 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7a44362c-31a2-493e-8c35-27a929d72f07" class="block result-appear" style="animation-delay: 1.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.UHD.BluRay.2160p.TrueHD.Atmos.7.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">54.94 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/b6886d21-b027-4fd8-91f5-61e810c68697" class="block result-appear" style="animation-delay: 1.3s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.UHD.BluRay.2160p.TrueHD.Atmos.7.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">53.90 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/88beb6cc-5449-4e8d-b6fd-796c5089a829" class="block result-appear" style="animation-delay: 1.35s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) BluRay - 1080p - Multi Auds [Tamil + Telugu + English + Hindi] DD5.1 (640Kbps) - H.264 - 7.5GB - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">7.57 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c94e39b0-1ff4-428d-afa7-fa2d33629b06" class="block result-appear" style="animation-delay: 1.4000000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) - 4K HEVC Bluray - Tamil + Telugu + Hindi (DD 5.1 640Kbps) - 7.9GB ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">7.91 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/cbea2cdd-c10f-464b-9d08-b36388621e00" class="block result-appear" style="animation-delay: 1.4500000000000002s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Age of Ultron (2015) - 4K HEVC Bluray - Tamil + Telugu + Hindi (BD 5.1 640Kbps &amp; DD 5.1 192Kbps) - 7GB ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.94 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/5de08f22-27c3-42d5-9070-87111af8f41f" class="block result-appear" style="animation-delay: 1.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Infinity War (2018) 720p 10bit BluRay x265 HEVC [Org DSNP Hindi DDP 5.1 ~192Kbps + English DDP 5.1] ESub ~ Immortal.mkv_</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.24 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/07bf2838-4270-4afe-972c-de02329d9d69" class="block result-appear" style="animation-delay: 1.55s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Age Of Ultron (2015) BluRay HDR 2160p 4K -  HEVC 10Bits MULTI (BD DD5.1 UNTOUCHED) ORIGINAL AUDIOS [ENGLISH (320Kbps) + TELUGU (448Kbps) + TAMIL (384Kbps) + Hindi (640Kbps)] - AC3 - x265 -  ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.96 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/97647fe5-6995-47d1-adc1-0d3dc5823b39" class="block result-appear" style="animation-delay: 1.6s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">36.87 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/06269d62-a2cd-42f5-a82c-4d6937c9a87f" class="block result-appear" style="animation-delay: 1.6500000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080p.10bit.IMAX.DS4K.DSNP.WEB-Rip.[Org.DSNP.Tamil.DDP5.1-English.DDP7.1].HEVC-NmCT.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.23 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d6e7aadd-62cc-4d7e-b1cc-4ad8e364dde2" class="block result-appear" style="animation-delay: 1.7000000000000002s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.2160p.BluRay.x265-TERMINAL.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">16.86 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/acb27841-bf71-49b2-9b47-18fc8fa29f19" class="block result-appear" style="animation-delay: 1.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">53.74 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/2e62254c-3d73-4192-94b3-6736d12745e7" class="block result-appear" style="animation-delay: 1.8s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.1080p.10bit.IMAX.DS4K.DSNP.WEB-Rip.[Org.BD.Tamil.DD5.1-Org.DSNP.Tamil+Telugu.DDP5.1-English.DDP7.1].HEVC-NmCT.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">9.01 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f3c565cc-57d9-4599-99f0-a48f00fc4f42" class="block result-appear" style="animation-delay: 1.85s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.Bluray.1080p.DTS.HDMA7.1.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">29.11 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/49bebdae-ec3f-4e25-b585-d7ca8e1bb2e6" class="block result-appear" style="animation-delay: 1.9000000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.1080p.3D.BluRay.Half-SBS.x264.DTS-HD.MA.7.1-FGT.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">25.05 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/86c36fd6-a5f3-4467-aa1a-8e7d0f56edaf" class="block result-appear" style="animation-delay: 1.9500000000000002s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">12.20 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/62e68adc-faf3-44ba-a121-575a2a427818" class="block result-appear" style="animation-delay: 2.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">06.The Avengers (2012) 1080p 10bit Bluray x265 HEVC [Org BD 5.1 Hindi + DD 5.1 English] ESubs ~ TombDoc.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.69 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c8e1ef3b-98f8-47e0-b251-9d8aaf51b0bc" class="block result-appear" style="animation-delay: 2.0500000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">19.Avengers - Infinity War (2018) 1080p 10bit Bluray x265 HEVC [Org BD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.96 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/6967c4f8-fb99-4c24-8889-d652f908b330" class="block result-appear" style="animation-delay: 2.1s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">11.Avengers - Age of Ultron (2015) 1080p 10bit Bluray x265 HEVC [Org BD 5.1 Hindi + DD 5.1 English] ESubs ~ TombDoc.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.61 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/cedadb71-ce95-460a-8ef7-a720bf17c3ef" class="block result-appear" style="animation-delay: 2.15s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080p.Open.Matte.[Tam+Tel+Hin]DDP5.1+[Eng-TrueHD.Atmos.7.1].H.264-RDJasDOOM.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">24.59 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/42445ca3-24ee-4433-825a-12485eec6161" class="block result-appear" style="animation-delay: 2.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 2160p DSNP WEB-DL x265 (AAC 2.0) [MULTi]-T0Bi.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">20.24 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/84eec219-3fea-463d-bf8e-abb015f0333c" class="block result-appear" style="animation-delay: 2.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.1998.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">17.14 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/4156ba22-c795-4f3e-baf6-a6affb1eb069" class="block result-appear" style="animation-delay: 2.3000000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">22.Avengers - Endgame (2019) 1080p 10bit Bluray x265 HEVC [Org HS DD 2.0 Hindi + DD 5.1 English] ESubs ~ TombDoc.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">7.18 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/b58546d1-0872-44bd-9064-2466cdb0e90c" class="block result-appear" style="animation-delay: 2.35s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) BluRay 1080p 10bit [Hindi DD 5.1 640Kbps +English DD7.1] x265 HEVC (ÌMMØRTÀL) PSA ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.37 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/77783253-f288-4aa8-9bb2-83b3b3944668" class="block result-appear" style="animation-delay: 2.4000000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers 2012 BluRay 1080p Dual Audio [Hindi BD 5.1 + English DTS 7.1] x264 ESub - mkvCinemas [Telly].mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">15.84 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/333dfe7a-fcd5-457b-82c9-0d5521921794" class="block result-appear" style="animation-delay: 2.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) 1080p UHD HDR10 BluRay x265 10bit HEVC [Org Hindi DDP 5.1 ~ 640Kbps + English DD 5.1] ESubs ~ Pahe.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.75 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/8b91aaac-4b11-4496-a359-d025c85e8d38" class="block result-appear" style="animation-delay: 2.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) BrRip 1080p 10bit [Hindi DD5.1 640Kbps  +English DD5.1] x265 HEVC (ÌMMØRTÀL) PSA ESub (2).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.11 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/1e746fec-5957-4dc5-ac72-72f73ae4d9bf" class="block result-appear" style="animation-delay: 2.5500000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.3D.BluRay.1080p.TrueHD.Atmos.7.1.AVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">40.78 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e7a0404b-64a6-4332-b334-8f8c5c088d95" class="block result-appear" style="animation-delay: 2.6s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers- Endgame - Open Matte - 2019.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">17.17 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/38440caf-a7e5-4dc4-be70-8ae0ecb710b7" class="block result-appear" style="animation-delay: 2.6500000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.IMAX.1080p.DSNP.WEB-DL.DDP5.1.Atmos.H.264-MZABI.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">9.58 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/42982243-607c-46c7-9a9e-49e4264eac90" class="block result-appear" style="animation-delay: 2.7s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.IMAX.2160p.10bit.HDR.WEBRip.6CH.x265.HEVC-PSA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">4.41 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/9e9a8c18-5899-44c0-890b-a0011db66a98" class="block result-appear" style="animation-delay: 2.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.IMAX.1080p.DSNP.WEB-DL.DDP5.1.Atmos.H.264-MZABI.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">8.39 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3780950e-92df-41fd-83ba-600ed4cbabcb" class="block result-appear" style="animation-delay: 2.8000000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) BluRay Open Matte 2160p 4K HEVC Multi Original (DD5.1) Audios  [ Telugu + Tamil + Hindi + English] - AC3 - x265 - ENCODED BY TM¥ - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">24.26 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/07467a5d-90ac-4b75-8009-84a772590bd1" class="block result-appear" style="animation-delay: 2.85s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) - Tamil + Telugu + Hindi - [DD 5.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.27 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/31ce2b9e-fc58-4f03-88b5-ba0ca53ff557" class="block result-appear" style="animation-delay: 2.9000000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) IMAX DSNP WEB-DL - 1080p - AVCx264 - (DDP5.1 - 192Kbps) - [ Tamil + Telugu + Hindi + Eng ATMOS ] ~ Jacksparrow063 - 10.6GB - MSub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">10.63 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3bef0e7f-8ba0-4880-a16b-ccf858877f6e" class="block result-appear" style="animation-delay: 2.95s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) IMAX DSNP WEB-DL - 1080p - AVCx264 - (DDP5.1 - 192Kbps) - [ Tamil + Telugu + Hindi + Eng ATMOS ] ~ Jacksparrow063 - 9GB - MSub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">9.20 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/610b1eea-2f25-4292-a469-2979a9700114" class="block result-appear" style="animation-delay: 3.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) Open Matte - 1080p - Multi Auds [Tamil + Telugu] DD5.1 (192Kbps) + [English DTS 5.1 (1509Kbps)] - H.264 - 13.8GB - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">13.80 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/b0d00dfd-51ff-4391-9ff1-308800df0726" class="block result-appear" style="animation-delay: 3.0500000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) - 4K HEVC Bluray - Tamil + Telugu + Hindi (BD 5.1 640Kbps &amp; DD 5.1 192Kbps) - 7.8GB ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">7.83 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/1ac5182c-b280-41d3-866a-7dff949e3c86" class="block result-appear" style="animation-delay: 3.1s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.UHD.BluRay.2160p.TrueHD.Atmos.7.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">50.06 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/642a6957-a8a3-44c7-88fe-b33f4fafeb08" class="block result-appear" style="animation-delay: 3.1500000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.UHD.BluRay.2160p.TrueHD.Atmos.7.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">49.32 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7bc58e99-8c9e-4cc8-870f-8d5bf9399f2f" class="block result-appear" style="animation-delay: 3.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080P.Bluray.X264-CeeTorrents.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.42 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/788c8d2b-1cfe-4ceb-9f72-e97fe764da34" class="block result-appear" style="animation-delay: 3.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">1-Avengers - Endgame (2019) 2160p INTERNAL UHD DYNAMIC HDR-X 10bit HEVC [Org DSNP Hindi DD+ 5.1Ch 640Kbps + English TrueHD Atmos 7.1] ESubs ~ (strange) TEKNO3D.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">44.24 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7e386016-79dc-449c-847f-836630bf7717" class="block result-appear" style="animation-delay: 3.3000000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) BluRay Open Matte 2160p 4K HEVC Multi Original (DD5.1) Audios  [ Telugu + Tamil + Hindi + English] - AC3 - x265 - ENCODED BY TM - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">29.8 GiB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f9808364-9f9b-4e18-ae85-6c21777f3437" class="block result-appear" style="animation-delay: 3.35s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War (2018) BluRay Open Matte 2160p 4K HEVC Multi Original (DD5.1) Audios  [ Telugu + Tamil + Hindi + English] - AC3 - x265 - ENCODED BY TM - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">24.3 GiB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/1a1389ec-1187-448f-bbb5-d414d23deb81" class="block result-appear" style="animation-delay: 3.4000000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) BluRay 4K 2160p SDRMulti Original Audios (DD5.1 ~ 640Kbps) - [Hindi - English(DD7.1) - Telugu - Tamil] - x264 -  ENCODED BY TM - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">8.5 GiB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3ce4934b-8c61-4463-a41f-2f6d4d75657a" class="block result-appear" style="animation-delay: 3.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 1080p DS4K HDR-R BluRay (Hindi+Eng) DTS x265 - PeruGuy.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">10.45 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/a3abd807-ba7a-41c9-b334-4b6fb2404ee8" class="block result-appear" style="animation-delay: 3.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.2160p.BluRay.x265-TERMINAL.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">14.80 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/a6feee55-d017-4f37-975e-353b0268d13f" class="block result-appear" style="animation-delay: 3.5500000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.BluRay.1080p.DTS-HD.MA.7.1.x264.dxva-FraMeSToR-xpost.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">18.58 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/5caca8cb-bb98-4a1f-9771-5ff6f7d8e845" class="block result-appear" style="animation-delay: 3.6s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.Bluray.1080p.x265.10bit.2audio.MNHD-FRDS.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">8.33 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c1fc233d-a7a7-40f5-8875-371e08e490b3" class="block result-appear" style="animation-delay: 3.6500000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.2160p.BluRay.x265-TERMINAL.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">19.83 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/5d1dda77-2a16-47db-9d5e-18ce48df77c2" class="block result-appear" style="animation-delay: 3.7s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Age of Ultron (2015) [2160p] [HDR] (bluray) [WMAN-LorD]-xpost.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.68 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/cf675b25-1cd2-43a1-8cd7-a7be0468004f" class="block result-appear" style="animation-delay: 3.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">49.06 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/13fb28c7-832f-4d40-967d-d2e5595b7ea7" class="block result-appear" style="animation-delay: 3.8000000000000003s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.1080p.BluRay.DTS.x264-Geek.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">16.98 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/64e83723-bbe0-47ba-836d-1aa29018bdb4" class="block result-appear" style="animation-delay: 3.85s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Age.of.Ultron.2015.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">48.17 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/27813106-6227-4da6-ac30-08cdad9589c3" class="block result-appear" style="animation-delay: 3.9000000000000004s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Masked.Avengers.1981.1080p.Blu-ray.x264.DD.2.0-qqboy1017.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.98 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d716b52c-195b-4042-b0af-84a7fc34b87e" class="block result-appear" style="animation-delay: 3.95s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 1080p [SDR] DS4K 10bit BDRip x265 HEVC [Hindi BD 5.1 + English DDP 5.1] ESubs — PeruGuy.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">8.52 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/bcda4a9c-1002-4a01-bb6e-a0671f914e64" class="block result-appear" style="animation-delay: 4.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080p.BluRay.[Tam+Tel+Hin]DDP5.1+[Eng-DTS-HD.MA.7.1].H.264-InTheMemoryofIronMan.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">18.91 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/415311a1-880c-46db-98a0-9aa8285161b1" class="block result-appear" style="animation-delay: 4.05s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080p.3D.BluRay.Half-SBS.x264.TrueHD.7.1.Atmos-FGT.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">26.60 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d1803952-fb1f-44e4-aaf8-46f5847a1e0a" class="block result-appear" style="animation-delay: 4.1000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.IMAX.2160p.DSNP.WEB-DL.TrueHD.7.1.Atmos.DoVi.HDR.HEVC-SiC.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">22.73 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d4872246-08c4-4926-b8e3-19fb338cf4d1" class="block result-appear" style="animation-delay: 4.15s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.IMAX.2160p.DSNP.WEB-DL.TrueHD.7.1.Atmos.DoVi.HDR.HEVC-SiC.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">28.31 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/515956ec-ff71-4a63-b964-5aa0d2303a71" class="block result-appear" style="animation-delay: 4.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Endgame (2019) 2160p DSNP WEB-DL x265 (AAC 2.0) [MULTi]-T0Bi.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">25.86 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e2a97d80-9ff9-4164-b797-26d73f57d256" class="block result-appear" style="animation-delay: 4.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.IMAX.2160p.Hybrid.DSNP.WEB-DL.TrueHD.7.1.DoVi.HDR10.HEVC-3L.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">22.59 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/37a2bb43-9f04-4d9e-8997-5a36cfccde42" class="block result-appear" style="animation-delay: 4.3s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.2160p.UHD.BluRay.x265.HDR.DD+7.1-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">5.43 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/cfd08d61-2534-451f-a6d4-de806287bb82" class="block result-appear" style="animation-delay: 4.3500000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.IMAX.2160p.WEB-DL.x265.HDR.DD+5.1.Atmos-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.49 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c29b83dd-a92d-42c5-818d-59435f33133a" class="block result-appear" style="animation-delay: 4.4s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.2160p.BluRay.x265-TERMINAL.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">13.32 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/dc90e531-6091-423d-9c38-570e5b5a5cde" class="block result-appear" style="animation-delay: 4.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers 2012 720p 10bit BrRip x265 HEVC [Hindi DD5.1 ~640Kbps + English DD5.1] (ÌMMØRTÀL) PSA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.14 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3bb47b03-25f1-402c-aeaa-e9a5916cde62" class="block result-appear" style="animation-delay: 4.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War 2018 720p 10bit BluRay [Hindi DD5.1 640Kbps + English DD5.1] x265 HEVC (ÌMMØRTÀL) PSA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.10 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/59820f90-b67e-459b-a3c2-050fb0bff857" class="block result-appear" style="animation-delay: 4.55s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 2160p 4K UHD HDR10 BluRay x265 10bit HEVC [Hindi BD5.1 ~ 640Kbps + English DTS-HDMA 7.1] Esub ~ TERMiNAL.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">17.50 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/84ccfa64-0ae3-49b8-9d54-742c4fb6fbd0" class="block result-appear" style="animation-delay: 4.6000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Age of Ultron (2015) [1080p 3D] [Remux] [Hindi + English] [FraMeSToR].mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">37.07 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3447868c-9404-472f-9ec3-b3cafd47b3f1" class="block result-appear" style="animation-delay: 4.65s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers_Endgame_2019_1080p_10bit_BluRay_Hindi_DD5_1_192Kbps_English.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.05 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f0b9d909-d8a4-4179-a632-bf500c1ec1ff" class="block result-appear" style="animation-delay: 4.7s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) 720p 10bit BluRay x265 HEVC [Org DSNP Hindi DDP 5.1 ~192Kbps + English DDP 5.1] ESub ~ Immortal.mkv_</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.31 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/a78df7fa-f8f7-4ed4-9d88-5a020f9e48e5" class="block result-appear" style="animation-delay: 4.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.2160p.UHD.BluRay.x265.HDR.DD+5.1.Atmos-Pahe.in.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">4.65 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/583f6d6a-755f-4a7a-a719-bc07fc125f9e" class="block result-appear" style="animation-delay: 4.800000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) BluRay 4K 2160p SDR Multi Original Audios (DD5.1 ~ 640Kbps) - [Hindi - English(DD7.1) - Telugu - Tamil] - x264 -  ENCODED BY TM¥ - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">8.47 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/226bdfe7-59a5-45a7-8c08-fb11c34738d9" class="block result-appear" style="animation-delay: 4.8500000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame (2019) BluRay Open Matte 2160p 4K HEVC Multi Original (DD5.1) Audios  [ Telugu + Tamil + Hindi + English] - AC3 - x265 - ENCODED BY TM¥ - ESub.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">29.77 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/ff20009a-0b89-4024-b715-46bd16e25e00" class="block result-appear" style="animation-delay: 4.9s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers (2012) Bluray 1080p x264 [ Org Telugu (DD+ 5.1 - 640kbps)+English (DD 5.1)]Esub_TeamHTP.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.28 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/8eb56523-d4c1-4f6a-a1ee-b83962c71190" class="block result-appear" style="animation-delay: 4.95s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.Open.Matte.1080p.Hybrid.DD+7.1.x264-TeamHD.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">31.05 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/51843f7f-ad88-413f-8431-3c68f61edab6" class="block result-appear" style="animation-delay: 5.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Can.que.aka.Crippled.Avengers.1978.BluRay.1080p.DD.2.0.AVC.REMUX-FraMeSToR.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">18.52 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e20555de-c2b2-4bf8-9e1b-6f6bedf3932f" class="block result-appear" style="animation-delay: 5.050000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.1080p.BluRay.DV.HDR.X265.DD.5.1-Chivaman.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.09 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/95a7bc92-dd7d-4b95-bb2a-5af300a9e4da" class="block result-appear" style="animation-delay: 5.1000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Marvel.Studios.Avengers.Infinity.War.2018.2160p.DSNP.WEB-DL.DDP5.1.Atmos.DV.H.265-GTM.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">17.74 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/ab888c73-5863-4225-816b-2615131de4ae" class="block result-appear" style="animation-delay: 5.15s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.1080p.BluRay.DDP5.1.x265.10bit-LAMA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.98 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f6aaeb9d-b745-4f0e-85b5-2905f9e12f7e" class="block result-appear" style="animation-delay: 5.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Infinity War 2018 BluRay 1080p Dual Audio [Hindi BD 5.1 + English DTS 7.1] x264 ESub - mkvCinemas [Telly].mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">16.26 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/c58f21cf-1be4-4228-9186-2ff75a9484fb" class="block result-appear" style="animation-delay: 5.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Infinity War (2018) IMAX 1080P DS4K HDR-R WEBRip [HIN-TAM-TEL-ENG] DDP 5.1 Atmos ~ PeruGuy.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">6.54 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/97398eb4-1a70-48a8-8e82-a96c27601621" class="block result-appear" style="animation-delay: 5.300000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The.Avengers.2012.1080p.BluRay.DTS.x264-HDMaNiAcS.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">15.72 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7d694050-ac4e-49eb-a9ec-bc40f338236d" class="block result-appear" style="animation-delay: 5.3500000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">The Avengers (2012) 720p 10bit BluRay x265 HEVC [Org DSNP Hindi DDP 5.1 ~192Kbps + English DDP 5.1] ESub ~ Immortal.mkv_</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.47 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/58e17eae-ef4f-4fd9-8fea-4821ac3fee8c" class="block result-appear" style="animation-delay: 5.4s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Infinity.War.2018.1080p.3D.BluRay.Half-SBS.x264.TrueHD.7.1.Atmos-FGT.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">25.44 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/6cdaf543-3ac7-47ed-b058-eb22a304d558" class="block result-appear" style="animation-delay: 5.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers Endgame 2019 1080p 10bit BluRay [Hindi DD5.1 -192Kbps +English DD7.1] x265 HEVC (ÌMMØRTÀL) PSA (2).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">3.05 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3ea7a65a-8e92-4cee-b7a9-8939705dc494" class="block result-appear" style="animation-delay: 5.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Age Of Ultron (2015) 2160p DSNP WEB-DL x265 (AAC 2.0) [MULTi]-T0Bi.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">20.08 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/7c03316b-b2e0-4954-8736-d1f6e1974682" class="block result-appear" style="animation-delay: 5.550000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers.Endgame.2019.1080p.WEBRip.DDP7.1.x264-Geek.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">22.10 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/45d3e159-77ec-4d38-b1d6-ff8357b8a699" class="block result-appear" style="animation-delay: 5.6000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Avengers - Infinity War (2018) 2160p DSNP WEB-DL x265 (AAC 2.0) [MULTi]-T0Bi.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">20.89 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/f1210f5e-12dc-4314-a361-b5537291563f" class="block result-appear" style="animation-delay: 5.65s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E01 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.25 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e80fec2d-95d3-4366-a805-ce92a4ff87b7" class="block result-appear" style="animation-delay: 5.7s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E02 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.40 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/01c1e427-784e-49b4-ab9b-46b6c893b5fa" class="block result-appear" style="animation-delay: 5.75s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E03 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.23 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/22c383e1-994c-47f3-9c19-1c29494bfbe6" class="block result-appear" style="animation-delay: 5.800000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E04 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.23 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/91a176f4-ae1b-43fc-a1f6-ce6c924c9f4b" class="block result-appear" style="animation-delay: 5.8500000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E05 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.11 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/d414869e-b046-4311-9807-945f0d6779a5" class="block result-appear" style="animation-delay: 5.9s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Scavengers Reign (2023) S01E06 (1080p AMZN WEB-DL H265 SDR DDP 5.1 English - HONE).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.15 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/01968271-8613-44e0-a2b5-76ca68b3406b" class="block result-appear" style="animation-delay: 5.95s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S02E08.What.if.the.Avengers.Assembled.in.1602.1080p.DSNP.WEB-DL.DDP5.1.Atmos.H.264-FLUX.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.41 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/feec72b6-d6b7-48d9-8a3b-4b712006b530" class="block result-appear" style="animation-delay: 6.0s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.720p.HS.WEB-DL.DDP5.1.Atmos.H.265-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">282.82 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/ef0c8a32-0711-4e9e-84a0-79f87d43784b" class="block result-appear" style="animation-delay: 6.050000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.1080p.HS.WEB-DL.DDP5.1.Atmos.H.264-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">815.26 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/cbeccce7-6b97-44ad-832d-a74f7c891924" class="block result-appear" style="animation-delay: 6.1000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.2021.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.WEB-DL.DDP5.1.Atmos.H.265-Spidey.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.16 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/831f3688-4449-473b-ae81-6ab7e4445da4" class="block result-appear" style="animation-delay: 6.15s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.720p.HS.WEB-DL.DDP5.1.Atmos.H.264-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">419.30 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/ba10c2c5-b4f5-4c84-a267-b4059bf16c27" class="block result-appear" style="animation-delay: 6.2s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.HS.WEB-DL.DDP5.1.Atmos.H.265-SARVO.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.16 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/8c8eaf9a-dfef-4f42-9e47-7f836855aa96" class="block result-appear" style="animation-delay: 6.25s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.1080p.HS.WEB-DL.DDP5.1.Atmos.H.265-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">803.06 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/8fddaa28-8dd6-4209-adba-d2138fb01806" class="block result-appear" style="animation-delay: 6.300000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.1080p.HS.WEB-DL.DDP5.1.Atmos.H.264-SARVO.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">815.26 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/e20d1a98-18fc-4c82-976d-fef72cd628f0" class="block result-appear" style="animation-delay: 6.3500000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.HS.WEB-DL.DDP5.1.Atmos.H.265-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.16 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/06fa50d2-945a-4018-bd08-fa4b76a9fcfc" class="block result-appear" style="animation-delay: 6.4s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.HS.WEB-DL.DDP5.1.Atmos.DV.H.265-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.84 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/5457243e-2451-4390-89f1-016502c98089" class="block result-appear" style="animation-delay: 6.45s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.HS.WEB-DL.DDP5.1.Atmos.H.265-PMI.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">2.16 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/14d32985-ca35-48c5-b625-71a9d1bd8917" class="block result-appear" style="animation-delay: 6.5s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.1080p.HS.WEB-DL.DDP5.1.Atmos.H.265-PMI.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">803.06 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/791fd975-ab60-4079-9ab0-2049ef24845b" class="block result-appear" style="animation-delay: 6.550000000000001s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.1080p.DSNP.WEB-DL.DDP5.1.Atmos.H.264-Kitsune.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.16 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/6d53d8ed-5c18-4e26-809a-98ec34fbb39c" class="block result-appear" style="animation-delay: 6.6000000000000005s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">What.If.S03E01.What.If.The.Hulk.Fought.the.Mech.Avengers.2160p.HS.WEB-DL.DDP5.1.Atmos.HDR.H.265-ViSTA.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">1.78 GB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/87cc441e-f8d3-49a4-890c-1327a2f02e6f" class="block result-appear" style="animation-delay: 6.65s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Married... with Children (1987) - S06E19 - Psychic Avengers (480p DVD x265 Silence).mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">235.58 MB</span>
+                    </div>
+                </a>
+                
+                <a href="/file/3b28012f-279f-4017-a729-4148466dad21" class="block result-appear" style="animation-delay: 6.7s">
+                    <div class="card result-card rounded-lg p-4 mb-3">
+                        <div class="title-container mb-3">
+                            <span class="text-base leading-normal">Gunsmoke.S11E14.The.Avengers.AMZN.WEB-DL.DDP2.0.H.264-DARKSABER.mkv</span>
+                        </div>
+                        <span class="inline-block px-3 py-1 rounded-full bg-gray-900 text-gray-300 text-sm border border-gray-700">738.41 MB</span>
+                    </div>
+                </a>
+                
+            </div>
+        </div>
+        
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 py-6 border-t border-gray-800">
+            <div class="pulse mb-4">
+                <a href="https://t.me/starkmediahub" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors text-white glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm.14 19.018c-.84 0-1.68-.002-2.52 0-.5 1-1.002 0-1.502-.5-1.5-1.5-3-3-4.5-4.5-.5-.5-1-1-1.5-1.5h-1v-1c.026-.822.006-1.647.01-2.47.597 0 1.113-.56 1.53-.978l6.84-6.84c.094-.093.192-.182.294-.266.15-.118.338-.236.524-.264.892-.126 1.55.61 1.55 1.5v5c0 .667.333 1 1 1h2.975c.565 0 1.131-.01 1.696 0 1.496.027 2.185 1.624 1.375 2.88-1.377 2.13-2.715 4.283-4.072 6.425-.266.42-.562.83-.856 1.238-.539.75-1.54 1.007-2.344.523-.973-.586-1.985-1.147-3-1.75z"/>
+                    </svg>
+                    Join our Telegram
+                </a>
+            </div>
+            <div class="text-gray-500 text-sm">
+                Faster searches, better results, unlimited entertainment
+            </div>
+        </footer>
+    </div>
+
+    <div id="popup" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div class="relative z-10 bg-gray-800 border border-blue-500 rounded-xl p-6 max-w-md w-full shadow-2xl animate-bounce-in">
+            <button id="closePopup" class="absolute top-3 right-3 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold gradient-text">Stream 4K & 1080p on Any Device—No Buffering!</h3>
+                <p class="text-gray-300">Are you tired of annoying ads, visiting multiple websites just to find a download link, only to end up with slow, unreliable downloads that fail midway and can't be resumed?</p>
+                <p class="text-gray-300">We offer an app supported on all platforms, including Android, iOS, Windows, Linux, and Android TV. It provides all content in 4K and 1080p without buffering—at a fraction of Netflix's cost!</p>
+                <a href="https://t.me/starkmediahub" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors">
+                    Join our Telegram Group for More Info
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes bounce-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+            animation: bounce-in 0.5s ease-out;
+        }
+    </style>
+
+    <script>
+        // Popup functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const popup = document.getElementById('popup');
+            const closeBtn = document.getElementById('closePopup');
+            let popupTimer;
+            
+            // Function to show popup
+            function showPopup() {
+                popup.classList.remove('hidden');
+            }
+            
+            // Function to hide popup
+            function hidePopup() {
+                popup.classList.add('hidden');
+            }
+            
+            // Close button event
+            closeBtn.addEventListener('click', function() {
+                hidePopup();
+                // Reset the timer when manually closed
+                clearTimeout(popupTimer);
+                startPopupTimer();
+            });
+            
+            // Start the timer
+            function startPopupTimer() {
+                popupTimer = setTimeout(showPopup, 60000); // Show every minute (60000ms)
+            }
+            
+            // Initial timer start
+            startPopupTimer();
+        });
+
+        function processSearch(e) {
+            e.preventDefault();
+            const searchInput = document.getElementById('searchInput').value.trim();
+            
+            if (searchInput) {
+                // Show loading animation
+                document.getElementById('loadingOverlay').classList.add('active');
+                
+                // Create a hidden form to submit that gets the token
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/get-search-token';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'search_query';
+                input.value = searchInput;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function searchWithTrend(term) {
+            // Show loading animation
+            document.getElementById('loadingOverlay').classList.add('active');
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/get-search-token';
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'search_query';
+            input.value = term;
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            
+            return false;
+        }
+
+        // Visual feedback for search button
+        document.getElementById('searchButton').addEventListener('mousedown', function() {
+            this.style.transform = 'scale(0.98)';
+        });
+        
+        document.getElementById('searchButton').addEventListener('mouseup', function() {
+            this.style.transform = 'scale(1)';
+        });
+
+        // Staggered animation for search results (in case JavaScript needs to handle it)
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.querySelectorAll('#searchResults > a');
+            results.forEach((result, index) => {
+                setTimeout(() => {
+                    result.style.opacity = '1';
+                    result.style.transform = 'translateY(0)';
+                }, 100 + (index * 50));
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92813f7d7b7449aa',t:'MTc0MzI3MTAzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -13,12 +13,26 @@
     <!-- Stylesheet includes -->
 </head>
 <body>
+    <!-- Mobile navigation toggle button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+    
+    <!-- Menu overlay for mobile - appears when menu is shown -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
     <div class="layout-container">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="d-flex align-items-center mb-4">
-                <i class="bi bi-play-circle-fill me-2" style="color: var(--neon-blue); font-size: 1.5rem;"></i>
-                <h1 class="m-0 fs-4 fw-bold cyberpunk-gradient-text">StreamX</h1>
+        <div class="sidebar" id="sidebar">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-play-circle-fill me-2" style="color: var(--neon-blue); font-size: 1.5rem;"></i>
+                    <h1 class="m-0 fs-4 fw-bold cyberpunk-gradient-text">StreamX</h1>
+                </div>
+                <!-- Mobile close button (only visible on mobile) -->
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
             
             <div class="nav flex-column mb-5">
@@ -26,11 +40,11 @@
                     <i class="bi bi-house-door-fill"></i>
                     Home
                 </a>
-                <a href="javascript:scrollToSection('search-section')" class="nav-link">
+                <a href="javascript:scrollToSection('search-section')" class="nav-link" data-mobile-close="true">
                     <i class="bi bi-search"></i>
                     Search
                 </a>
-                <a href="javascript:scrollToSection('results-section')" class="nav-link">
+                <a href="javascript:scrollToSection('results-section')" class="nav-link" data-mobile-close="true">
                     <i class="bi bi-cloud-download"></i>
                     Downloads
                 </a>
@@ -52,6 +66,21 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <!-- Mobile Top Navigation Bar -->
+            <div class="mobile-top-nav">
+                <div class="d-flex justify-content-between align-items-center p-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-play-circle-fill me-2" style="color: var(--neon-blue); font-size: 1.25rem;"></i>
+                        <span class="fw-bold cyberpunk-gradient-text">StreamX</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm" id="mobileSearchBtn" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Hero Banner -->
             <div class="hero-bg mb-4" id="search-section">
                 <div class="hero-content">
@@ -155,9 +184,9 @@
                             <i class="bi bi-list-ul me-2" style="color: var(--neon-blue);"></i> 
                             Search Results
                         </h3>
-                        <div id="searchLoading" class="d-none">
-                            <div class="loading-indicator me-2"></div>
-                            <span class="ms-2">Searching the cloud...</span>
+                        <div id="searchLoading" class="d-none loading-container">
+                            <div class="loading-indicator"></div>
+                            <span class="loading-text">Searching the cloud...</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -239,6 +268,28 @@
                     </p>
                 </footer>
             </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation Bar (Mobile) -->
+    <div class="bottom-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-item active">
+                <i class="bi bi-house-door"></i>
+                <span class="label">Home</span>
+            </a>
+            <a href="javascript:scrollToSection('search-section')" class="nav-item">
+                <i class="bi bi-search"></i>
+                <span class="label">Search</span>
+            </a>
+            <a href="javascript:scrollToSection('results-section')" class="nav-item">
+                <i class="bi bi-cloud-download"></i>
+                <span class="label">Files</span>
+            </a>
+            <a href="/info" class="nav-item">
+                <i class="bi bi-info-circle"></i>
+                <span class="label">Info</span>
+            </a>
         </div>
     </div>
 
@@ -330,9 +381,9 @@
                     </div>
 
                     <!-- Loading Indicator -->
-                    <div id="fileDetailsLoader" class="text-center py-5">
-                        <div class="loading-indicator mx-auto mb-3"></div>
-                        <p class="text-muted">Loading file details...</p>
+                    <div id="fileDetailsLoader" class="loading-container py-4">
+                        <div class="loading-indicator"></div>
+                        <span class="loading-text">Loading file details...</span>
                     </div>
 
                     <div id="fileDetailsContent" class="d-none">
