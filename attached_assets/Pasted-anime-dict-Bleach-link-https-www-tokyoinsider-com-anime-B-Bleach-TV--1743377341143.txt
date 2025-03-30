@@ -1,0 +1,56 @@
+anime_dict = {
+    "Bleach": {
+        "link": "https://www.tokyoinsider.com/anime/B/Bleach_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xbleach.png"
+    },
+    "Naruto Shippuuden": {
+        "link": "https://www.tokyoinsider.com/anime/N/Naruto_Shippuuden_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xnaruto.png"
+    },
+    "One Piece": {
+        "link": "https://www.tokyoinsider.com/anime/F/One_Piece_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xonepiece.png"
+    },
+    "Fairy Tail": {
+        "link": "https://www.tokyoinsider.com/anime/F/Fairy_Tail_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xfairytail.png"
+    },
+    "Fullmetal Alchemist: Brotherhood": {
+        "link": "https://www.tokyoinsider.com/anime/F/Fullmetal_Alchemist:_Brotherhood_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xfma.png"
+    },
+    "Katekyo Hitman Reborn!": {
+        "link": "https://www.tokyoinsider.com/anime/K/Katekyo_Hitman_Reborn!_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xkhr.png"
+    },
+    "Sword Art Online": {
+        "link": "https://www.tokyoinsider.com/anime/S/Sword_Art_Online_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xsao.png"
+    },
+    "Dragon Ball Kai": {
+        "link": "https://www.tokyoinsider.com/anime/D/Dragon_Ball_Kai_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xdbkai.png"
+    },
+    "Ao no Exorcist": {
+        "link": "https://www.tokyoinsider.com/anime/A/Ao_no_Exorcist_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xane.png"
+    },
+    "Hunter x Hunter (2011)": {
+        "link": "https://www.tokyoinsider.com/anime/H/Hunter____Hunter_(TV_2011)_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xhxh.png"
+    },
+    "Highschool of the Dead": {
+        "link": "https://www.tokyoinsider.com/anime/H/Highschool_of_the_Dead_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xhotd.png"
+    },
+    "Beelzebub": {
+        "link": "https://www.tokyoinsider.com/anime/B/Beelzebub_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xbb.png"
+    },
+    "Gintama": {
+        "link": "https://www.tokyoinsider.com/anime/G/Gintama_(TV)",
+        "image": "https://www.tokyoinsider.com/img/xgintama.png"
+    }
+}
+
+print(anime_dict)

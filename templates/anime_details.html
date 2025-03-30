@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamX | Anime Details</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <style>
+        /* Anime details specific styles */
+        .anime-detail-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* Episode sources styles */
+        .episodes-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .episode-card {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .episode-number {
+            color: var(--text-primary);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .episode-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .episode-sources-btn {
+            background-color: var(--button-bg);
+            border: var(--button-border);
+            color: var(--neon-blue);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .episode-sources-btn:hover {
+            background-color: var(--button-hover-bg);
+            box-shadow: 0 0 10px var(--neon-blue-glow);
+        }
+        
+        .episode-sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        
+        .episode-sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .source-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 8px 12px;
+        }
+        
+        .source-details {
+            flex: 1;
+        }
+        
+        .source-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        
+        .source-info {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .source-download-btn, .source-stream-btn {
+            background-color: var(--button-bg);
+            border: var(--button-border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .source-download-btn {
+            color: var(--neon-blue);
+        }
+        
+        .source-stream-btn {
+            color: #10ff85; /* neon green */
+            border-color: rgba(16, 255, 133, 0.3);
+        }
+        
+        .source-download-btn:hover {
+            background-color: var(--button-hover-bg);
+            box-shadow: 0 0 10px var(--neon-blue-glow);
+            color: var(--neon-blue);
+            text-decoration: none;
+        }
+        
+        .source-stream-btn:hover {
+            background-color: rgba(16, 255, 133, 0.15);
+            box-shadow: 0 0 10px rgba(16, 255, 133, 0.5);
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .episode-search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .episode-search-container .input-group-text {
+            background-color: rgba(25, 25, 35, 0.8) !important;
+            border: 1px solid rgba(53, 239, 255, 0.3) !important;
+            border-right: none !important;
+            color: var(--neon-blue) !important;
+        }
+        
+        .episode-search-container .form-control {
+            background-color: rgba(25, 25, 35, 0.8) !important;
+            border: 1px solid rgba(53, 239, 255, 0.3) !important;
+            border-left: none !important;
+            color: white !important;
+            box-shadow: 0 0 8px rgba(53, 239, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .episode-search-container .form-control:focus {
+            box-shadow: 0 0 15px rgba(53, 239, 255, 0.3);
+            outline: none;
+            border-color: var(--neon-blue) !important;
+        }
+        
+        .episode-search-container .input-group:focus-within .input-group-text {
+            border-color: var(--neon-blue) !important;
+        }
+        
+        .anime-detail-poster {
+            width: 300px;
+            flex-shrink: 0;
+            border-radius: var(--card-border-radius);
+            overflow: hidden;
+            border: var(--card-border);
+        }
+        
+        .anime-detail-poster img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .anime-detail-info {
+            flex-grow: 1;
+        }
+        
+        .anime-title-large {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+        
+        .anime-creator {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .anime-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .anime-genre-tag {
+            background-color: rgba(53, 239, 255, 0.1);
+            color: var(--neon-blue);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid rgba(53, 239, 255, 0.2);
+        }
+        
+        .anime-summary {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            background-color: rgba(15, 15, 18, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .episodes-container {
+            background-color: var(--card-bg);
+            border-radius: var(--card-border-radius);
+            border: var(--card-border);
+            padding: 20px;
+        }
+        
+        .episodes-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .episode-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background-color: rgba(25, 25, 35, 0.5);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .episode-card:hover {
+            background-color: rgba(53, 239, 255, 0.1);
+            border-color: rgba(53, 239, 255, 0.2);
+        }
+        
+        .episode-number {
+            font-weight: 600;
+            color: var(--neon-blue);
+        }
+        
+        .episode-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .episode-download-btn {
+            background-color: var(--button-bg);
+            border: var(--button-border);
+            color: var(--neon-blue);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .episode-download-btn:hover {
+            background-color: var(--neon-blue);
+            color: var(--dark-bg);
+        }
+        
+        .back-to-anime-button {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: rgba(25, 25, 35, 0.6);
+            border: 1px solid rgba(53, 239, 255, 0.3);
+            color: var(--neon-blue);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px rgba(53, 239, 255, 0.2);
+        }
+        
+        .back-to-anime-button:hover {
+            background-color: rgba(53, 239, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: white;
+            box-shadow: 0 0 15px rgba(53, 239, 255, 0.4);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+        
+        .loading-container {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(53, 239, 255, 0.2);
+            border-left-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Video player styles */
+        .video-player-container {
+            width: 100%;
+            background-color: #000;
+            position: relative;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+        }
+        
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        @media (max-width: 768px) {
+            .anime-detail-container {
+                flex-direction: column;
+            }
+            
+            .anime-detail-poster {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+            }
+            
+            /* Mobile styles for source items */
+            .source-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .source-action {
+                margin-top: 8px;
+                align-self: flex-end;
+            }
+            
+            /* Mobile video player */
+            .video-player-container {
+                padding-top: 75%; /* More square for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Brand -->
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="bi bi-play-circle-fill" style="color: var(--neon-blue);"></i>
+                </div>
+                <div class="brand-text">StreamX</div>
+            </div>
+            
+            <!-- Navigation Sections -->
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <a href="/" class="nav-link">
+                    <i class="bi bi-house-door"></i>
+                    Dashboard
+                </a>
+                <a href="/anime" class="nav-link active">
+                    <i class="bi bi-collection-play"></i>
+                    Anime
+                </a>
+                <a href="/" class="nav-link">
+                    <i class="bi bi-search"></i>
+                    Search Files
+                </a>
+            </div>
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">RESOURCES</div>
+                <a href="/info" class="nav-link">
+                    <i class="bi bi-code-slash"></i>
+                    API Documentation
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-info-circle"></i>
+                    Help Center
+                </a>
+            </div>
+            
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="user-avatar">G</div>
+                <div class="user-info">
+                    <div class="user-name">Guest User</div>
+                    <div class="user-status">Online</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Mobile Top Navigation Bar -->
+            <div class="mobile-top-nav">
+                <div class="d-flex justify-content-between align-items-center p-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-play-circle-fill me-2" style="color: var(--neon-blue); font-size: 1.25rem;"></i>
+                        <span class="fw-bold cyberpunk-gradient-text">StreamX</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm" id="mobileSearchBtn" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Anime Details Content -->
+            <div class="container mb-4">
+                <a href="/anime" class="cyberpunk-button back-to-anime-button">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Anime List
+                </a>
+                
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted">Loading anime details...</p>
+                </div>
+                
+                <!-- Error State -->
+                <div id="errorState" class="alert alert-danger d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Unable to load anime details. Please try again later.
+                </div>
+                
+                <!-- Anime Details Content -->
+                <div id="animeContent" class="d-none">
+                    <div class="anime-detail-container">
+                        <div class="anime-detail-poster">
+                            <img id="animePoster" src="https://via.placeholder.com/300x450?text=Loading..." alt="Anime poster">
+                        </div>
+                        
+                        <div class="anime-detail-info">
+                            <h1 id="animeTitle" class="anime-title-large">Loading...</h1>
+                            <div id="animeCreator" class="anime-creator">
+                                <i class="bi bi-person-fill me-2"></i> <span>Loading...</span>
+                            </div>
+                            
+                            <div id="animeGenres" class="anime-genres">
+                                <!-- Genres will be added here -->
+                            </div>
+                            
+                            <div id="animeSummary" class="anime-summary">
+                                Loading anime summary...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="episodes-container">
+                        <div class="episodes-title">
+                            <i class="bi bi-play-circle" style="color: var(--neon-blue);"></i> Episodes
+                        </div>
+                        
+                        <div class="episode-search-container mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="episodeSearch" class="form-control" placeholder="Search episodes...">
+                            </div>
+                        </div>
+                        
+                        <div id="episodesGrid">
+                            <!-- Episodes will be added here -->
+                        </div>
+                        
+                        <div id="noEpisodes" class="text-center py-4 d-none">
+                            <i class="bi bi-exclamation-circle" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 10px;"></i>
+                            <p class="text-muted">No episodes available for this anime.</p>
+                        </div>
+                        
+                        <div id="noEpisodesFound" class="text-center py-4 d-none">
+                            <i class="bi bi-search" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 10px;"></i>
+                            <p class="text-muted">No episodes match your search.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/" class="nav-item">
+            <i class="bi bi-house-door"></i>
+            <span>Home</span>
+        </a>
+        <a href="/anime" class="nav-item active">
+            <i class="bi bi-collection-play"></i>
+            <span>Anime</span>
+        </a>
+        <a href="#" class="nav-item" id="mobileSearchLink">
+            <i class="bi bi-search"></i>
+            <span>Search</span>
+        </a>
+        <a href="/info" class="nav-item">
+            <i class="bi bi-info-circle"></i>
+            <span>Info</span>
+        </a>
+    </div>
+    
+    <!-- Episode Sources Modal -->
+    <div class="modal fade" id="episodeSourcesModal" tabindex="-1" aria-labelledby="episodeSourcesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background-color: var(--dark-bg); border: 1px solid var(--card-border);">
+                <div class="modal-header" style="border-bottom-color: var(--card-border);">
+                    <h5 class="modal-title" id="episodeSourcesModalLabel" style="color: var(--neon-blue);">Episode Sources</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <!-- Sources will be loaded here -->
+                </div>
+                <div class="modal-footer" style="border-top-color: var(--card-border);">
+                    <button type="button" class="btn" style="background-color: var(--button-bg); color: var(--text-primary); border: var(--button-border);" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video Player Modal -->
+    <div class="modal fade" id="videoPlayerModal" tabindex="-1" aria-labelledby="videoPlayerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content" style="background-color: var(--dark-bg); border: 1px solid var(--card-border);">
+                <div class="modal-header" style="border-bottom-color: var(--card-border);">
+                    <h5 class="modal-title" id="videoPlayerModalLabel" style="color: var(--neon-blue);">Video Player</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="videoPlayerContainer" class="video-player-container">
+                        <video id="videoPlayer" controls class="video-js vjs-big-play-centered" style="width: 100%;" preload="auto">
+                            <source src="" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get anime ID from URL
+            const animeId = '{{ anime_id }}';
+            // Make sure to construct the URL correctly with a slash if needed
+            const animeUrl = animeId.startsWith('/') ? 
+                `https://www.tokyoinsider.com${animeId}` : 
+                `https://www.tokyoinsider.com/${animeId}`;
+            
+            // DOM Elements
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const animeContent = document.getElementById('animeContent');
+            const animePoster = document.getElementById('animePoster');
+            const animeTitle = document.getElementById('animeTitle');
+            const animeCreator = document.getElementById('animeCreator').querySelector('span');
+            const animeGenres = document.getElementById('animeGenres');
+            const animeSummary = document.getElementById('animeSummary');
+            const episodesGrid = document.getElementById('episodesGrid');
+            const noEpisodes = document.getElementById('noEpisodes');
+            
+            // Fetch anime details
+            fetchAnimeDetails();
+            
+            function fetchAnimeDetails() {
+                showLoading(true);
+                
+                fetch(`/api/anime/details?url=${encodeURIComponent(animeUrl)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayAnimeDetails(data);
+                        showLoading(false);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching anime details:', error);
+                        showError(true);
+                        showLoading(false);
+                    });
+            }
+            
+            function displayAnimeDetails(anime) {
+                // Set basic details
+                document.title = `StreamX | ${anime.title}`;
+                animeTitle.textContent = anime.title || 'Unknown Title';
+                animeCreator.textContent = anime.creator || 'Unknown Creator';
+                animeSummary.textContent = anime.summary || 'No summary available.';
+                
+                // Set poster image
+                if (anime.poster_url) {
+                    animePoster.src = anime.poster_url;
+                    animePoster.alt = anime.title;
+                } else {
+                    animePoster.src = 'https://via.placeholder.com/300x450?text=No+Image';
+                }
+                
+                // Add genres
+                animeGenres.innerHTML = '';
+                if (anime.genres && anime.genres.length > 0) {
+                    anime.genres.forEach(genre => {
+                        const genreTag = document.createElement('div');
+                        genreTag.className = 'anime-genre-tag';
+                        genreTag.textContent = genre;
+                        animeGenres.appendChild(genreTag);
+                    });
+                } else {
+                    const genreTag = document.createElement('div');
+                    genreTag.className = 'anime-genre-tag';
+                    genreTag.textContent = 'Anime';
+                    animeGenres.appendChild(genreTag);
+                }
+                
+                // Initialize episode data store for search functionality
+                const allEpisodes = anime.episodes || [];
+                const noEpisodesFound = document.getElementById('noEpisodesFound');
+                
+                // Add episodes
+                episodesGrid.innerHTML = '';
+                if (allEpisodes.length > 0) {
+                    displayEpisodes(allEpisodes);
+                    
+                    // Setup episode search
+                    const episodeSearch = document.getElementById('episodeSearch');
+                    episodeSearch.addEventListener('input', function() {
+                        const searchTerm = this.value.trim().toLowerCase();
+                        
+                        if (searchTerm === '') {
+                            displayEpisodes(allEpisodes);
+                            return;
+                        }
+                        
+                        const filteredEpisodes = allEpisodes.filter(episode => {
+                            return episode.number.toString().toLowerCase().includes(searchTerm);
+                        });
+                        
+                        if (filteredEpisodes.length === 0) {
+                            episodesGrid.innerHTML = '';
+                            noEpisodesFound.classList.remove('d-none');
+                        } else {
+                            noEpisodesFound.classList.add('d-none');
+                            displayEpisodes(filteredEpisodes);
+                        }
+                    });
+                    
+                    noEpisodes.classList.add('d-none');
+                    noEpisodesFound.classList.add('d-none');
+                } else {
+                    noEpisodes.classList.remove('d-none');
+                    noEpisodesFound.classList.add('d-none');
+                }
+                
+                function displayEpisodes(episodes) {
+                    episodesGrid.innerHTML = '';
+                    episodes.forEach(episode => {
+                        const episodeCard = document.createElement('div');
+                        episodeCard.className = 'episode-card';
+                        episodeCard.innerHTML = `
+                            <div class="episode-number">Episode ${episode.number}</div>
+                            <div class="episode-actions">
+                                <button class="episode-sources-btn" data-url="${episode.url}" data-episode="${episode.number}">
+                                    <i class="bi bi-list-ul me-1"></i> View Episode Sources
+                                </button>
+                            </div>
+                        `;
+                        episodesGrid.appendChild(episodeCard);
+                    });
+                    
+                    // Add click event listeners for sources buttons
+                    document.querySelectorAll('.episode-sources-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const episodeUrl = this.getAttribute('data-url');
+                            const episodeNumber = this.getAttribute('data-episode');
+                            
+                            // Get modal elements
+                            const modal = document.getElementById('episodeSourcesModal');
+                            const modalTitle = modal.querySelector('.modal-title');
+                            const modalBody = modal.querySelector('.modal-body');
+                            
+                            // Set the modal title with the episode number
+                            modalTitle.textContent = `Episode ${episodeNumber} Sources`;
+                            
+                            // Show loading spinner in the modal
+                            modalBody.innerHTML = `
+                                <div class="text-center py-3">
+                                    <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto;"></div>
+                                    <p class="mt-2">Loading episode sources...</p>
+                                </div>
+                            `;
+                            
+                            // Create and show the modal
+                            let bsModal;
+                            try {
+                                bsModal = new bootstrap.Modal(modal);
+                            } catch (error) {
+                                console.error('Bootstrap Modal error:', error);
+                                // Fallback for when Bootstrap is not available
+                                modal.style.display = 'block';
+                                modal.classList.add('show');
+                                document.body.classList.add('modal-open');
+                                
+                                // Add backdrop
+                                const backdrop = document.createElement('div');
+                                backdrop.className = 'modal-backdrop fade show';
+                                document.body.appendChild(backdrop);
+                                
+                                // Close modal when clicking the close button
+                                const closeButtons = modal.querySelectorAll('[data-bs-dismiss="modal"]');
+                                closeButtons.forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        modal.style.display = 'none';
+                                        modal.classList.remove('show');
+                                        document.body.classList.remove('modal-open');
+                                        document.body.removeChild(backdrop);
+                                    });
+                                });
+                                return;
+                            }
+                            
+                            bsModal.show();
+                            
+                            // Fetch episode sources and populate modal
+                            fetchEpisodeSources(episodeUrl, modalBody, episodeNumber);
+                        });
+                    });
+                }
+                
+                // Show content
+                animeContent.classList.remove('d-none');
+            }
+            
+            function fetchEpisodeSources(episodeUrl, modalBody, episodeNumber) {
+                fetch(`/api/episode/download?url=${encodeURIComponent(episodeUrl)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            modalBody.innerHTML = `
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    ${data.error}
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Check if we have sources in the structured format
+                        if (data.sources && data.sources.length > 0) {
+                            let sourcesHTML = '<div class="episode-sources-list">';
+                            
+                            data.sources.forEach(source => {
+                                sourcesHTML += `
+                                    <div class="source-item">
+                                        <div class="source-details">
+                                            <div class="source-name">${source.name}</div>
+                                            <div class="source-info">
+                                                <span><i class="bi bi-hdd me-1"></i> ${source.size || 'Unknown size'}</span>
+                                                <span><i class="bi bi-cloud-download me-1"></i> ${source.downloads || '0'} downloads</span>
+                                                ${source.uploader ? `<span><i class="bi bi-person me-1"></i> ${source.uploader}</span>` : ''}
+                                                ${source.added_date ? `<span><i class="bi bi-calendar me-1"></i> ${source.added_date}</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="source-action">
+                                            <div class="d-flex gap-2">
+                                                <a href="/anime/${animeId}/watch/${episodeNumber}?source=${encodeURIComponent(source.download_url)}" class="source-stream-btn">
+                                                    <i class="bi bi-play-fill"></i> Stream
+                                                </a>
+                                                <a href="${source.download_url}" target="_blank" class="source-download-btn">
+                                                    <i class="bi bi-download"></i> Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            sourcesHTML += '</div>';
+                            modalBody.innerHTML = sourcesHTML;
+                        } 
+                        // Fallback to HTML parsing if no structured sources
+                        else if (data.html_content) {
+                            // Parse the HTML content (legacy method as fallback)
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(data.html_content || '', 'text/html');
+                            const sourcesDivs = doc.querySelectorAll('.c_h2, .c_h2b');
+                            
+                            if (sourcesDivs && sourcesDivs.length > 0) {
+                                let sourcesHTML = '<div class="episode-sources-list">';
+                                
+                                sourcesDivs.forEach(div => {
+                                    const links = div.querySelectorAll('a');
+                                    let downloadLink = '';
+                                    let fileName = '';
+                                    
+                                    // Find the download link (not the comment link)
+                                    for (let link of links) {
+                                        const href = link.getAttribute('href');
+                                        if (!href) continue;
+                                        
+                                        if (!href.includes('/comment') && 
+                                           (href.startsWith('https://') && 
+                                           (href.endsWith('.mp4') || href.endsWith('.mkv') || href.includes('dl/')))) {
+                                            downloadLink = href;
+                                            fileName = link.textContent.trim();
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (!downloadLink || !fileName) return;
+                                    
+                                    // Extract metadata
+                                    const infoDiv = div.querySelector('.finfo');
+                                    let fileSize = 'Unknown size';
+                                    let downloadCount = '0 downloads';
+                                    let uploader = '';
+                                    let addedDate = '';
+                                    
+                                    if (infoDiv) {
+                                        const infoHtml = infoDiv.innerHTML;
+                                        
+                                        const sizeMatch = infoHtml.match(/Size:\s*<b>([^<]+)<\/b>/i);
+                                        if (sizeMatch) fileSize = sizeMatch[1];
+                                        
+                                        const downloadsMatch = infoHtml.match(/Downloads:\s*<b>([^<]+)<\/b>/i);
+                                        if (downloadsMatch) downloadCount = downloadsMatch[1] + ' downloads';
+                                        
+                                        const uploaderMatch = infoHtml.match(/Uploader:\s*<b>([^<]+)<\/b>/i);
+                                        if (uploaderMatch) uploader = uploaderMatch[1];
+                                        
+                                        const dateMatch = infoHtml.match(/Added On:\s*<b>([^<]+)<\/b>/i);
+                                        if (dateMatch) addedDate = dateMatch[1];
+                                    }
+                                    
+                                    sourcesHTML += `
+                                        <div class="source-item">
+                                            <div class="source-details">
+                                                <div class="source-name">${fileName}</div>
+                                                <div class="source-info">
+                                                    <span><i class="bi bi-hdd me-1"></i> ${fileSize}</span>
+                                                    <span><i class="bi bi-cloud-download me-1"></i> ${downloadCount}</span>
+                                                    ${uploader ? `<span><i class="bi bi-person me-1"></i> ${uploader}</span>` : ''}
+                                                    ${addedDate ? `<span><i class="bi bi-calendar me-1"></i> ${addedDate}</span>` : ''}
+                                                </div>
+                                            </div>
+                                            <div class="source-action">
+                                                <div class="d-flex gap-2">
+                                                    <a href="/anime/${animeId}/watch/${episodeNumber}?source=${encodeURIComponent(downloadLink)}" class="source-stream-btn">
+                                                        <i class="bi bi-play-fill"></i> Stream
+                                                    </a>
+                                                    <a href="${downloadLink}" target="_blank" class="source-download-btn">
+                                                        <i class="bi bi-download"></i> Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                
+                                sourcesHTML += '</div>';
+                                modalBody.innerHTML = sourcesHTML;
+                            } else {
+                                modalBody.innerHTML = `
+                                    <div class="alert alert-info" role="alert">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        No download sources found for this episode.
+                                    </div>
+                                `;
+                            }
+                        } else if (data.download_url) {
+                            // Fallback to single download URL if available
+                            modalBody.innerHTML = `
+                                <div class="episode-sources-list">
+                                    <div class="source-item">
+                                        <div class="source-details">
+                                            <div class="source-name">Direct Download</div>
+                                            <div class="source-info">
+                                                <span><i class="bi bi-hdd me-1"></i> Unknown size</span>
+                                            </div>
+                                        </div>
+                                        <div class="source-action">
+                                            <div class="d-flex gap-2">
+                                                <a href="/anime/${animeId}/watch/${episodeNumber}?source=${encodeURIComponent(data.download_url)}" class="source-stream-btn">
+                                                    <i class="bi bi-play-fill"></i> Stream
+                                                </a>
+                                                <a href="${data.download_url}" target="_blank" class="source-download-btn">
+                                                    <i class="bi bi-download"></i> Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // No sources found
+                            modalBody.innerHTML = `
+                                <div class="alert alert-warning" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    No download sources found for this episode.
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching episode sources:', error);
+                        modalBody.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Error loading sources. Please try again later.
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Helper functions for UI state
+            function showLoading(show) {
+                loadingState.classList.toggle('d-none', !show);
+                errorState.classList.add('d-none');
+                if (show) {
+                    animeContent.classList.add('d-none');
+                }
+            }
+            
+            function showError(show) {
+                errorState.classList.toggle('d-none', !show);
+                if (show) {
+                    animeContent.classList.add('d-none');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

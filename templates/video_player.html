@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamX | Watch Episode {{ episode_number }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #0a0a15;
+            --darker-bg: #05050a;
+            --card-bg: rgba(16, 16, 28, 0.6);
+            --card-border: 1px solid rgba(53, 239, 255, 0.2);
+            --card-border-radius: 8px;
+            --text-primary: #ffffff;
+            --text-secondary: #b4b4cc;
+            --text-muted: #767688;
+            --neon-blue: #35efff;
+            --neon-blue-glow: rgba(53, 239, 255, 0.5);
+            --button-bg: rgba(25, 25, 35, 0.8);
+            --button-hover-bg: rgba(53, 239, 255, 0.15);
+            --button-border: 1px solid rgba(53, 239, 255, 0.3);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-header {
+            padding: 15px 20px;
+            background-color: var(--darker-bg);
+            border-bottom: 1px solid rgba(53, 239, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background-color: rgba(25, 25, 35, 0.8);
+            border: 1px solid rgba(53, 239, 255, 0.3);
+            border-radius: 5px;
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background-color: rgba(53, 239, 255, 0.15);
+            color: white;
+            box-shadow: 0 0 10px rgba(53, 239, 255, 0.3);
+            text-decoration: none;
+        }
+
+        .video-player-container {
+            width: 66.66%; /* Takes up 2/3 of the screen */
+            background-color: #000;
+            position: relative;
+            padding-top: 37.5%; /* 56.25% * 2/3 (maintain 16:9 aspect ratio) */
+            overflow: hidden;
+            margin: 0 auto; /* Center the container */
+            border: 2px solid rgba(53, 239, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(53, 239, 255, 0.2);
+        }
+
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .video-info {
+            width: 66.66%;
+            margin: 20px auto;
+            background-color: var(--card-bg);
+            border: var(--card-border);
+            border-radius: var(--card-border-radius);
+            padding: 15px;
+        }
+        
+        .video-title {
+            font-size: 20px;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .player-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 10px 15px;
+            }
+            
+            .video-player-container {
+                width: 95%;
+                padding-top: 53.4%; /* 56.25% * 95% */
+            }
+            
+            .video-info {
+                width: 95%;
+            }
+            
+            .btn-group {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-header">
+        <div class="player-title">
+            <i class="bi bi-play-circle-fill"></i>
+            <span>Episode {{ episode_number }}</span>
+        </div>
+        <a href="/anime/details/{{ anime_id }}" class="back-button">
+            <i class="bi bi-arrow-left me-2"></i> Back to Episode List
+        </a>
+    </div>
+    
+    <div class="video-player-container">
+        <video id="videoPlayer" controls autoplay>
+            <source src="/anime/stream?url={{ source_url|urlencode }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <div class="video-info">
+        <div class="video-title">{{ anime_title|default('Anime') }} - Episode {{ episode_number }}</div>
+        <div class="d-flex justify-content-between">
+            <div class="btn-group">
+                <a href="/anime/details/{{ anime_id }}" class="btn btn-sm back-button">
+                    <i class="bi bi-list me-1"></i> All Episodes
+                </a>
+                {% if prev_episode %}
+                <a href="/anime/{{ anime_id }}/watch/{{ prev_episode }}?source={{ prev_source|urlencode }}" class="btn btn-sm back-button">
+                    <i class="bi bi-skip-backward-fill"></i> Previous
+                </a>
+                {% endif %}
+                {% if next_episode %}
+                <a href="/anime/{{ anime_id }}/watch/{{ next_episode }}?source={{ next_source|urlencode }}" class="btn btn-sm back-button">
+                    Next <i class="bi bi-skip-forward-fill"></i>
+                </a>
+                {% endif %}
+            </div>
+            <a href="{{ source_url }}" target="_blank" class="btn btn-sm back-button">
+                <i class="bi bi-download me-1"></i> Download
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            
+            // Handle video errors
+            videoPlayer.addEventListener('error', function(e) {
+                console.error('Video playback error:', e);
+                
+                // Create error message container
+                const container = document.querySelector('.video-player-container');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.5rem;"></i>
+                    <div class="mt-2">Error loading video. The source may not be available or compatible.</div>
+                    <div class="mt-3">
+                        <a href="{{ source_url }}" target="_blank" class="btn btn-primary">
+                            <i class="bi bi-download me-2"></i> Download directly instead
+                        </a>
+                    </div>
+                `;
+                
+                // Replace video with error message
+                videoPlayer.style.display = 'none';
+                container.appendChild(errorDiv);
+            });
+        });
+    </script>
+</body>
+</html>
