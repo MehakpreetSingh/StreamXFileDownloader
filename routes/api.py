@@ -9,6 +9,11 @@ import datetime
 from flask import Blueprint, request, jsonify
 from bs4 import BeautifulSoup
 import urllib.parse
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import concurrent.futures
 
 # Configure logging
@@ -61,59 +66,35 @@ def search():
             return jsonify({"error": "Search query is required"}), 400
 
         logger.info(f"Searching for: {search_query}")
+        # Set up Selenium WebDriver
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run in headless mode
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument(f"user-agent={USER_AGENT}")
 
-        # Step 1: Get Search Token
-        headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': 'https://new4.scloud.ninja',
-            'Referer': 'https://new4.scloud.ninja/',
-            'User-Agent': USER_AGENT
-        }
+        # Path to your ChromeDriver (update this path as needed)
+        driver_path = "/Users/mehakpreetsingh/Documents/ScraperNinja/routes/chromedriver"  # Ensure this path is correct for your environment
+        service = Service(driver_path)
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.get("https://new4.scloud.ninja")
 
-        # Prepare form data
-        form_data = f"search_query={urllib.parse.quote(search_query)}"
+        # Find the search input field and enter the query
+        search_input = driver.find_element(By.ID, "searchInput")
+        search_input.send_keys(search_query)
 
-        # Make POST request to get token
-        token_response = session.post(
-            SEARCH_URL,
-            data=form_data,
-            headers=headers,
-            allow_redirects=False
-        )
+        # Submit the form
+        search_button = driver.find_element(By.ID, "searchButton")
+        search_button.click()
 
-        # Check if response contains redirect with token
-        if token_response.status_code != 302:
-            logger.error(f"Invalid response from token request: {token_response.status_code}")
-            return jsonify({"error": "Failed to get search token"}), 500
+            # Wait for the results page to load
+        time.sleep(3)  # Adjust the delay as needed
 
-        # Extract token from Location header
-        location_header = token_response.headers.get('location', '')
-        token_match = re.search(r'token=([a-f0-9\-]+)', location_header)
-
-        if not token_match:
-            logger.error("Failed to extract token from redirect URL")
-            return jsonify({"error": "Failed to extract search token"}), 500
-
-        token = token_match.group(1)
-        logger.debug(f"Extracted token: {token}")
-
-        # Step 2: Fetch search results with token
-        results_url = f"{SEARCH_RESULTS_URL}{token}"
-        results_headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'User-Agent': USER_AGENT,
-            'Referer': 'https://new4.scloud.ninja/'
-        }
-
-        results_response = session.get(results_url, headers=results_headers)
-
-        if results_response.status_code != 200:
-            logger.error(f"Failed to fetch search results: {results_response.status_code}")
-            return jsonify({"error": "Failed to fetch search results"}), 500
-
+            # Get the page source and parse it with BeautifulSoup
+        page_source = driver.page_source        
+        print(page_source)  # Debugging line to check the page source
         # Parse HTML response
-        results = parse_search_results(results_response.text)
+        results = parse_search_results(page_source)
 
         return jsonify(results)
 
